@@ -1,0 +1,14 @@
+body  {
+    background-image: url("/static/images/Background.png");
+    background-repeat: no-repeat;
+    background-size: auto;
+}
+
+df-messenger {
+   --df-messenger-bot-message: #203ca0;
+   --df-messenger-button-titlebar-color: #7c47e1;
+   --df-messenger-chat-background-color: #fafafa;
+   --df-messenger-font-color: white;
+   --df-messenger-send-icon: #878fac;
+   --df-messenger-user-message: #479b3d;
+  }
