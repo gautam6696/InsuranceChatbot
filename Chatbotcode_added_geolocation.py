@@ -41,8 +41,36 @@ def geoDetails(city):
     # df_values = df.loc[df['City'] == city]
     # print(float(df_values["QI"]))
     response = {
-        'fulfillmentText': " {} has generally {}\n It has {} which is {} ".format(city, climate, pol, pol1)
+        'fulfillmentMessages': [
+            {
+                "text": {
+                    "text": [
+                        " {} has generally {}\n It has {} which is {} ".format(city, climate, pol, pol1)
+                    ],
+
+                }
+            },
+            {
+                "text": {
+                    "text": [
+                        "When will be your happy retirement age?"
+                    ]
+                }
+            }
+        ]
     }
+    
+    # response = {
+    #     'fulfillmentText': " {} has generally {}\n It has {} which is {} ".format(city, climate, pol, pol1)
+    # }
+    # response = {
+    #     "outputContexts": [
+    #         {
+    #             "name": "Locationfollowon"
+    #         }
+    #     ]
+    # }
+
     return response
 
 
