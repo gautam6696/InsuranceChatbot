@@ -2,7 +2,7 @@ from google.cloud import dialogflow
 session_client = dialogflow.SessionsClient()
 
 
-def detect_intent_texts(project_id, session_id, texts, language_code):
+def detect_intent_texts(project_id, session_id, text, language_code="en-US"):
     """Returns the result of detect intent with texts as inputs.
 
     Using the same `session_id` between requests allows continuation
@@ -14,35 +14,41 @@ def detect_intent_texts(project_id, session_id, texts, language_code):
 
 
 
-    for text in texts:
-        text_input = dialogflow.TextInput(text=text, language_code=language_code)
+    text_input = dialogflow.TextInput(text=text, language_code=language_code)
 
-        query_input = dialogflow.QueryInput(text=text_input)
+    query_input = dialogflow.QueryInput(text=text_input)
 
-        response = session_client.detect_intent(
-            request={"session": session, "query_input": query_input}
-        )
+    response = session_client.detect_intent(
+        request={"session": session, "query_input": query_input}
+    )
+    intent_name = response.query_result.intent.display_name
 
-        print("=" * 20)
-        print("Query text: {}".format(response.query_result.query_text))
-        print(
-            "Detected intent: {} (confidence: {})\n".format(
-                response.query_result.intent.display_name,
-                response.query_result.intent_detection_confidence,
-            )
-        )
-        print("Fulfillment text: {}\n".format(response.query_result.fulfillment_text))
+    #richresponses = response.query_result.fulfillment_messages
+    return response
+    # return response.query_result.fulfillment_messages,intent_name
+        
+        # for message in richresponses:
+        #     if message.text:
+        #         print("Not welcome ", message.text.text[0])
 
-def welcome_text():
-    project_id = "insurchatbot"
-    session_id = "1234"
+
+def welcome_text(project_id = "insurchatbot", session_id= "1234"):
 
     session = session_client.session_path(project_id, session_id)
     event_input = dialogflow.EventInput(name='WELCOME', language_code='en-US')
     query_input = dialogflow.QueryInput(event=event_input)
     response = session_client.detect_intent(session=session, query_input=query_input)
-    print(response.query_result)
+    richresponses = response.query_result.fulfillment_messages
+    # return 0
+    return response.query_result.fulfillment_messages
+    
+    # for message in richresponses:
+    #     print("This is ", message.text.text[0])
+
+    
     
 #detect_intent_texts("insurchatbot","1234",["Hello"],"en-US")
-welcome_text()
-detect_intent_texts("insurchatbot","1234",["Ram"],"en-US")
+# project_id = "insurchatbot"
+# welcome_text()
+# detect_intent_texts("insurchatbot","1234",["Ram"],"en-US")
+
