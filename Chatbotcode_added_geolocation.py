@@ -5,7 +5,6 @@ import pandas as pd
 from geopy.geocoders import Nominatim
 import apicode
 
-
 app = Flask("__name__")
 from flask_cors import CORS
 CORS(app)

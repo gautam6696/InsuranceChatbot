@@ -1,6 +1,6 @@
 // const container = document.querySelector('.chatbox_header')
 
-ngrokurl = "https://c38a-123-201-208-10.in.ngrok.io"
+ngrokurl =  "https://9562-123-201-208-149.in.ngrok.io"
 // const style ={
 //     top: 0,
 //     left: 0,
@@ -35,6 +35,7 @@ class Chatbox {
         this.messages = [];
         this.executed = false;
         this.chips = [];
+        // this.exec = true;
         
     }
 
@@ -172,6 +173,7 @@ class Chatbox {
 
     updateChatText(chatbox) {
         
+        
         // onchipclick(valuesr)
         // {
         //     console.log(valuesr)
@@ -192,24 +194,38 @@ class Chatbox {
 
         this.messages.slice().reverse().forEach(function (item, index) {
             if (item.name === "Nova") {
-                if (item.message.includes("bmi")) {
+                if (item.message.includes("fit")) {
 
                     // fireworks.start()
                     // setTimeout( function(){fireworks.stop()}, 4000)
 
                 // This is being called twice. I dont know why so be careful
                     html += '<div class="messages__item specialmessages__item--operator">' + item.message + '</div>'
-                    const chatheader = chatbox.querySelector('.chatbox__star--header')
+                    var chatheader = chatbox.querySelector('.chatbox__star--header')
                     //chatheader.style.transition = "all 2s";
-                    chatheader.innerHTML = '<img class= Star src="../static/images/Starsmall.png " alt="Star"> </img>'
+                    chatheader.innerHTML = '<img class= Star src="../static/images/Twinklingstar.gif " alt="Star"> </img>'
 
                 }
+                
                 else {
-                html += '<div class="messages__item messages__item--visitor">' + item.message + '</div>'
+                    
+                        html += '<div class="messages__item messages__item--visitor">' + item.message + '</div>'
+                    
                 }
             }
             else {
+
+                if(item.message.includes("do not consume")){
+                    // this.exec = false;
+                    //console.log("This is working"+ item.message)
+                    html += '<div class="messages__item messages__item--operator">' + item.message + '</div>'
+                    var chatheader = chatbox.querySelector('.chatbox__star--header2')
+                    chatheader.innerHTML = '<img class= Star src="../static/images/Twinklingstar.gif " alt="Star2"> </img>'
+                    // console.log(chatheader.innerHTML)
+                }
+                else{
                 html += '<div class="messages__item messages__item--operator">' + item.message + '</div>'
+                }
             }
         });
 

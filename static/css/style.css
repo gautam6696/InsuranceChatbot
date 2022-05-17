@@ -157,7 +157,7 @@ body {
 
 .Star{
     margin-left: 10px;
-    width: 30px;
+    width: 35px;
     height: auto;
     /* animation: fadeOut;
     transition: all 2s ease-in-out */
@@ -210,7 +210,7 @@ body {
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     border-bottom-left-radius: 20px;
-    background: orange;
+    background: orangered;
     color: white;
 }
 
