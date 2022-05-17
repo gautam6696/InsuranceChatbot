@@ -40,13 +40,17 @@ def geoDetails(city):
     else:
         pol = "low pollution"
         pol1 = "an excellent place to breathe safely"
+
     # file = "C:/Users/Gautam/Desktop/Numbeo.csv"
     # df = pd.read_csv(file)
     # df_values = df.loc[df['City'] == city]
     # print(float(df_values["QI"]))
+
+    
     text1 = " {} has generally {}\n It has {} which is {} ".format(city, climate, pol, pol1)
-    text2 = "When will be your happy retirement age?"
-    return [text1,text2]
+    text2 = "What is your marital status ?"
+    chipslist = ["Single","Divorced","Married"]
+    return [text1,text2, chipslist]
     # response = {
     #     'fulfillmentMessages': [
     #         {
@@ -97,7 +101,7 @@ def bmi(height, weight):
         remark = "Need to put on some weight as you are thin. Eat a healthy balanced diet"
     text1 = "Your bmi is {} which comes under {} category.{}.".format(value, status, remark)
     text2 = "Have you consumed nicotine or tobacco in last 3 years ?"
-    return [text1,text2]
+    return [text1,text2,["Daily","Often","Occasionally", "I do not consume"]]
     # Such a weird json response payload to type in. I think I am missing something? Better to make a class if time permits.
     # response = {
     #     'fulfillmentMessages': [
@@ -174,7 +178,6 @@ def noLife(data1):
     elif act == "Hi.Hi-no.Hi-no-Li-Sex-custom.Hi-no-LI-Sex-Age-custom.Hi-no-LI-Sex-Age-Ht-custom.Hi-no-LI-Sex-Age-Ht-Wt-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-Inr-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-Inr-Oc-custom":
         dict1["Occupation"] = data1.query_result.query_text
     elif act == "location":
-        
         city = data1.query_result.parameters["geo-city"]
         print("City is", city)
         dict1["Location"] = city
@@ -189,26 +192,26 @@ def yesLife(data1):
     #print("Yes life", data1)
 
 
-@ app.route("/", methods=['POST'])
-def index():
-    data1 = request.get_json()
-    if "initial" in data1['queryResult']['action']:
-        pass
-    elif "Hi.Hi-no" == data1['queryResult']['action']:
-        dict1["Life Insurance"] = "No"
-    elif "Hi.Hi-yes" == data1['queryResult']['action']:
-        dict1["Life Insurance"] = "Yes"
-    elif "Life Insurance" in dict1.keys():
-        if dict1["Life Insurance"] == "No":
-            end, a = noLife(data1)
-            if end == "end":
-                return jsonify(a)
-        else:
-            yesLife()
-    response = {
-        'fulfillmentText': ""
-    }
-    return jsonify(response)
+# @ app.route("/", methods=['POST'])
+# def index():
+#     data1 = request.get_json()
+#     if "initial" in data1['queryResult']['action']:
+#         pass
+#     elif "Hi.Hi-no" == data1['queryResult']['action']:
+#         dict1["Life Insurance"] = "No"
+#     elif "Hi.Hi-yes" == data1['queryResult']['action']:
+#         dict1["Life Insurance"] = "Yes"
+#     elif "Life Insurance" in dict1.keys():
+#         if dict1["Life Insurance"] == "No":
+#             end, a = noLife(data1)
+#             if end == "end":
+#                 return jsonify(a)
+#         else:
+#             yesLife()
+#     response = {
+#         'fulfillmentText': ""
+#     }
+#     return jsonify(response)
 #<link rel="stylesheet" href="{{ url_for('static',  filename='css/template.css') }}">
 
 @ app.route("/welcome", methods=['POST'])
@@ -249,7 +252,12 @@ def predict():
     if funcot:
         for i,text in enumerate(funcot):
             message["answer"+str(i)] = funcot[i]
+            if i==1:
+                break
 
+        if len(funcot)>2:
+            for i,text in enumerate(funcot[2]):
+                message["chips"+str(i)] = funcot[2][i]  
         return jsonify(message)
 
     i = 0
@@ -257,7 +265,7 @@ def predict():
     # GOD please help me on how to deserialise a Struct protubuf by google. This is a hacky solution until then :(
     for messageresp in richresponses:
         if messageresp.payload:
-            templist = []
+            # templist = []
             for j in range(len(messageresp.payload["richContent"][0][0]["options"]) ):
                 #templist.append(messageresp.payload["richContent"][0][0]["options"][j]["text"])
                 message["chips"+str(j)] = messageresp.payload["richContent"][0][0]["options"][j]["text"]
@@ -265,7 +273,7 @@ def predict():
         if messageresp.text:
             message["answer"+str(i)] = messageresp.text.text[0]
             i = i+1
-
+    
     return jsonify(message)
 
 @ app.route("/website")
