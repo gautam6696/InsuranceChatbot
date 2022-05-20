@@ -39,15 +39,16 @@ def welcome_text(project_id = "insurchatbot", session_id= "1234"):
     response = session_client.detect_intent(session=session, query_input=query_input)
     richresponses = response.query_result.fulfillment_messages
     # return 0
-    return response.query_result.fulfillment_messages
+    
     
     # for message in richresponses:
     #     print("This is ", message.text.text[0])
+    return response.query_result.fulfillment_messages
 
     
     
-#detect_intent_texts("insurchatbot","1234",["Hello"],"en-US")
+# detect_intent_texts("insurchatbot","1234","Hello","en-US")
 # project_id = "insurchatbot"
 # welcome_text()
-# detect_intent_texts("insurchatbot","1234",["Ram"],"en-US")
+# detect_intent_texts("insurchatbot","1234","Ram","en-US")
 
