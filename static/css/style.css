@@ -163,10 +163,6 @@ body {
     transition: all 2s ease-in-out */
 }
 
-@keyframes fadeOut {
-    0% {opacity: 1;}
-    100% {opacity: 0;} 
- }
 
 .chatbox__heading--header {
     font-size: 1.2rem;

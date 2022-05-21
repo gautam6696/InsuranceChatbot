@@ -37,6 +37,8 @@ class Chatbox {
         this.messages = [];
         this.executed = false;
         this.chips = [];
+        this.star1placed = false;
+        this.star2placed = false;
         //var that = this;
         // this.exec = true;
 
@@ -166,7 +168,7 @@ class Chatbox {
                 // this.updateChatText(chatbox)
                 // }
                 // );
-                textField.value = ''
+                //textField.value = ''
 
             }).catch((error) => {
                 console.error('Error:', error);
@@ -209,7 +211,7 @@ class Chatbox {
             html += '</div>'
         };
 
-        this.messages.slice().reverse().forEach(function (item, index) {
+        this.messages.slice().reverse().forEach((function (item, index) {
             if (item.name === "Nova") {
                 if (item.message.includes("fit")) {
 
@@ -220,7 +222,17 @@ class Chatbox {
                     html += '<div class="messages__item specialmessages__item--operator">' + item.message + '</div>'
                     var chatheader = chatbox.querySelector('.chatbox__star--header')
                     //chatheader.style.transition = "all 2s";
-                    chatheader.innerHTML = '<img class= Star src="../static/images/Twinklingstar.gif " alt="Star"> </img>'
+                    
+                    
+                    if(!this.star1placed){
+                        this.star1placed = true;
+                        chatheader.innerHTML = '<img class= "Star animate__animated animate__wobble" src="../static/images/Twinklingstar.gif "  alt="Star"> </img>'
+                    }
+                    else{
+                        chatheader.innerHTML = '<img class= "Star" src="../static/images/Twinklingstar.gif "  alt="Star"> </img>'
+
+                    }
+                    
 
                 }
                 else if (item.message.includes("has generally") || item.message.includes("need analysis")) {
@@ -242,14 +254,25 @@ class Chatbox {
                     //console.log("This is working"+ item.message)
                     html += '<div class="messages__item messages__item--operator">' + item.message + '</div>'
                     var chatheader = chatbox.querySelector('.chatbox__star--header2')
-                    chatheader.innerHTML = '<img class= Star src="../static/images/Twinklingstar.gif " alt="Star2"> </img>'
+
+
+                    if(!this.star2placed){
+                        this.star2placed = true;
+                        chatheader.innerHTML = '<img class= "Star animate__animated animate__wobble" src="../static/images/Twinklingstar.gif "  alt="Star2"> </img>'
+                    }
+                    else{
+                        chatheader.innerHTML = '<img class= "Star" src="../static/images/Twinklingstar.gif "  alt="Star2"> </img>'
+
+                    }
+
+                    // chatheader.innerHTML = '<img class= Star src="../static/images/Twinklingstar.gif " alt="Star2"> </img>'
                     // console.log(chatheader.innerHTML)
                 }
                 else {
                     html += '<div class="messages__item messages__item--operator">' + item.message + '</div>'
                 }
             }
-        });
+        }).bind(this) );
 
         const chatmessage = chatbox.querySelector('.chatbox__messages');
 
@@ -292,7 +315,7 @@ class Chatbox {
             //var total_chips = this.chips;
             for (var k = 0; k < total_chips.length; k++) {
                 let single_chip = total_chips[k];
-                console.log(single_chip.innerHTML)
+                // console.log(single_chip.innerHTML)
                 single_chip.addEventListener('click', () => {
 
                     this.onExtraSendButton(chatbox,single_chip.innerHTML);
@@ -399,7 +422,7 @@ class Chatbox {
                 // this.updateChatText(chatbox)
                 // }
                 // );
-                textField.value = ''
+                // textField.value = ''
 
             }).catch((error) => {
                 console.error('Error:', error);
