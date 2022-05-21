@@ -4,9 +4,10 @@ import json
 import pandas as pd
 from geopy.geocoders import Nominatim
 import apicode
+from flask_cors import CORS
 
 app = Flask("__name__")
-from flask_cors import CORS
+
 CORS(app)
 dict1 = dict()
 
@@ -276,7 +277,7 @@ def predict():
     
     return jsonify(message)
 
-@ app.route("/website")
+@ app.route("/")
 def website():
     return render_template("base.html")
 

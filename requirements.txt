@@ -2,3 +2,6 @@ flask
 requests
 geopy
 pandas
+gunicorn
+google-cloud-dialogflow
+flask_cors

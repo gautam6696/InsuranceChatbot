@@ -1,6 +1,6 @@
 // const container = document.querySelector('.chatbox_header')
 
-ngrokurl = "http://127.0.0.1:5000"
+ngrokurl = "https://insurchatbot.el.r.appspot.com"
 // const style ={
 //     top: 0,
 //     left: 0,
