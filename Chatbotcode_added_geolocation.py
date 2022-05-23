@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, render_template
 import requests
 import json
 import pandas as pd
+from weo import download, WEO
+import numpy_financial as npf
 from geopy.geocoders import Nominatim
 import apicode
 from flask_cors import CORS
@@ -11,13 +13,34 @@ app = Flask("__name__")
 CORS(app)
 dict1 = dict()
 
+#Changes Made
+def sumInsured():
+    #Calculating Inflation using WEO
+    path, url = download(2022, 1)
+    df_cpi_country = WEO(path).countries(dict1["country"])["ISO"]
+    country_code = list(df_cpi_country)[0]
+    df_cpi_inflation = WEO(path).inflation()[country_code]["2021"]
+    inflation = df_cpi_inflation*0.01
+
+    #Sum Insured Calculation
+    years = dict1["RetrAge"] - dict1["Age"]
+    inv_rate = 0.10
+    disc_rate = 0.10 - inflation
+    avg_expenses = dict1["AvgExpenses"]
+    other_income = dict1["Investments"] - dict1["Loan"]
+    pv = npf.pv(disc_rate,years,avg_expenses,0,when='end')
+    sum_insured = pv - other_income
+    text1 = "Based on your details the right sum assured for you would be {} ".format(sum_insured)
+    return text1
+
+
 def geoDetails(city):
     loc = Nominatim(user_agent="GetLoc")
     # entering the location name
     getLoc = loc.geocode(city)
     state = getLoc.address.split(",")[-3]
     country = getLoc.address.split(",")[-1]
-
+    dict1["country"] = country
     api_key = "432e12f9-57c3-42c4-8fa1-ba346837d8a8"
     response_api = requests.get(
         f'http://api.airvisual.com/v2/city?city={city}&state={state}&country={country}&key={api_key}')
@@ -41,11 +64,12 @@ def geoDetails(city):
     else:
         pol = "low pollution"
         pol1 = "an excellent place to breathe safely"
-
-    # file = "C:/Users/Gautam/Desktop/Numbeo.csv"
-    # df = pd.read_csv(file)
-    # df_values = df.loc[df['City'] == city]
-    # print(float(df_values["QI"]))
+    #Changes Made
+    #Expenses details
+    file = "C:/Users/Gautam/Desktop/Numbeo.csv"
+    df = pd.read_csv(file)
+    df_values = df.loc[df['City'] == city]["Expenses3"]
+    dict1["AvgExpenses"] = df_values
 
     
     text1 = " {} has generally {}\n It has {} which is {} ".format(city, climate, pol, pol1)
@@ -184,6 +208,16 @@ def noLife(data1):
         dict1["Location"] = city
         a = geoDetails(city)
         return a
+    elif act == "Hi.Hi-no.Hi-no-Li-Sex-custom.Hi-no-LI-Sex-Age-custom.Hi-no-LI-Sex-Age-Ht-custom.Hi-no-LI-Sex-Age-Ht-Wt-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-Inr-custom":
+        dict1["Income"] = data1.query_result.parameters["number"]
+    elif act == "Investments.Investments-yes.Investments-yes-custom":
+        dict1["Investments"] = data1.query_result.parameters["number"]
+    elif act == "loan":
+        dict1["Loan"] = data1.query_result.parameters["number"]
+    elif act == "Investments.Investments-yes.Investments-yes-custom.Investments-yes-amt-custom.Investments-yes-amt-goals-custom":
+        dict1["RetrAge"] = data1.query_result.parameters["number"]
+        sum_insured = sumInsured()
+        return sum_insured
     return 0
     
 
