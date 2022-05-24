@@ -7,6 +7,10 @@ import numpy_financial as npf
 from geopy.geocoders import Nominatim
 import apicode
 from flask_cors import CORS
+import os
+
+
+
 
 app = Flask("__name__")
 
@@ -17,7 +21,9 @@ dict1 = dict()
 def sumInsured():
     #Calculating Inflation using WEO
     path, url = download(2022, 1)
+    print(dict1["country"])
     df_cpi_country = WEO(path).countries(dict1["country"])["ISO"]
+    print(df_cpi_country)
     country_code = list(df_cpi_country)[0]
     df_cpi_inflation = WEO(path).inflation()[country_code]["2021"]
     inflation = df_cpi_inflation*0.01
@@ -26,12 +32,14 @@ def sumInsured():
     years = dict1["RetrAge"] - dict1["Age"]
     inv_rate = 0.10
     disc_rate = 0.10 - inflation
-    avg_expenses = dict1["AvgExpenses"]
+    avg_expenses = dict1["AvgExpenses"]*12
+    pmt = dict1["Income"] - avg_expenses
     other_income = dict1["Investments"] - dict1["Loan"]
-    pv = npf.pv(disc_rate,years,avg_expenses,0,when='end')
-    sum_insured = pv - other_income
+    pv = npf.pv(disc_rate,years,-avg_expenses,0,when='end')
+    sum_insured = round(pv[0] - other_income, -3)
     text1 = "Based on your details the right sum assured for you would be {} ".format(sum_insured)
-    return text1
+    text2 = "Thank you for the details"
+    return [text1,text2]
 
 
 def geoDetails(city):
@@ -40,7 +48,7 @@ def geoDetails(city):
     getLoc = loc.geocode(city)
     state = getLoc.address.split(",")[-3]
     country = getLoc.address.split(",")[-1]
-    dict1["country"] = country
+    dict1["country"] = country.strip()
     api_key = "432e12f9-57c3-42c4-8fa1-ba346837d8a8"
     response_api = requests.get(
         f'http://api.airvisual.com/v2/city?city={city}&state={state}&country={country}&key={api_key}')
@@ -268,7 +276,7 @@ def predict():
     message = {}
     #print("This is the object", request.get_json())
     text = request.get_json().get("message")
-    resp = apicode.detect_intent_texts("insurchatbot","1234",text)
+    resp = apicode.detect_intent_texts("nova-dskj","1234",text)
     
     
     richresponses = resp.query_result.fulfillment_messages

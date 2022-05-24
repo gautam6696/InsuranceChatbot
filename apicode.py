@@ -1,7 +1,14 @@
 from google.cloud import dialogflow
-session_client = dialogflow.SessionsClient()
+import json
+from google.oauth2 import service_account
 
+project_id = 'nova-dskj'
 
+with open('C:/Users/Gautam/Downloads/insur-arcw-f8ac168f2276.json') as source:
+    info = json.load(source)
+
+storage_credentials = service_account.Credentials.from_service_account_info(info)
+session_client = dialogflow.SessionsClient(credentials=storage_credentials)
 def detect_intent_texts(project_id, session_id, text, language_code="en-US"):
     """Returns the result of detect intent with texts as inputs.
 
@@ -31,7 +38,7 @@ def detect_intent_texts(project_id, session_id, text, language_code="en-US"):
         #         print("Not welcome ", message.text.text[0])
 
 
-def welcome_text(project_id = "insurchatbot", session_id= "1234"):
+def welcome_text(project_id = "nova-dskj", session_id= "1234"):
 
     session = session_client.session_path(project_id, session_id)
     event_input = dialogflow.EventInput(name='WELCOME', language_code='en-US')
