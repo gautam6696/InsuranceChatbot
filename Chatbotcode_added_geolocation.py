@@ -8,7 +8,7 @@ from geopy.geocoders import Nominatim
 import apicode
 from flask_cors import CORS
 import os
-
+from countryinfo import CountryInfo
 
 
 
@@ -17,6 +17,11 @@ app = Flask("__name__")
 CORS(app)
 dict1 = dict()
 
+#Dictionary Inititialisations to avoid errors
+dict1["type"] = ""
+dict1["RetrResp"] = ""
+dict1["RetrAmt"]=0
+dict1["Investments"]=0
 #Changes Made
 def sumInsured():
     #Calculating Inflation using WEO
@@ -39,6 +44,60 @@ def sumInsured():
     sum_insured = round(pv[0] - other_income, -3)
     text1 = "Based on your details the right sum assured for you would be {} ".format(sum_insured)
     text2 = "Thank you for the details"
+    return [text1,text2]
+
+def goalPlan(age,retrAge):
+    diffAge = retrAge - age
+    if diffAge >= 3 :
+        plan = "Deferred Plan"
+    else :
+        plan = "Immediate Plan"
+    dict1["AnnuityPlan"] = plan
+    text1 = "According to your response it would be preferrable to select {}".format(plan)
+    text2 = "Could you please confirm by selecting the preferred choice"
+    return [text1,text2,["Deferred Plan","Immediate Plan"]]
+
+def annCalculation():
+    #Calculating Inflation using WEO
+    path, url = download(2022, 1)
+    print(dict1["country"])
+    df_cpi_country = WEO(path).countries(dict1["country"])["ISO"]
+    print(df_cpi_country)
+    country_code = list(df_cpi_country)[0]
+    df_cpi_inflation = WEO(path).inflation()[country_code]["2021"]
+    inflation = df_cpi_inflation*0.01
+
+    #Annuity Calculation
+    n = dict1["RetrAge"] - dict1["Age"]
+    roi = 0.09
+    expenses = dict1["AvgExpenses"]*0.75
+    fv_expenses = (expenses * pow((1 + inflation), n))
+    retr_age = dict1["RetrAge"]
+    if dict1["Sex"] == "Male":
+        life_expectancy = 73
+    elif dict1["Sex"] == "Female":
+        life_expectancy = 76
+    arr = ((1 + roi) / (1 + inflation)) - 1
+    arr_monthly = arr / 12
+    retr_months = (life_expectancy - retr_age) * 12
+    pmt = fv_expenses
+    if dict1["RetrAmt"]>0:
+        corpus = npf.pv(arr_monthly, retr_months, -pmt, when='end')
+        corpus= corpus[0] - dict1["RetrAmt"]
+    else:
+        corpus = npf.pv(arr_monthly, retr_months, -pmt, when='end')
+        corpus = corpus[0]
+    print(corpus)
+
+    if dict1["Investments"]>0:
+        corpus-=dict1["Investments"]
+    corpus =round (corpus, -3)
+    premium = npf.pmt(roi / 12, n * 12, 0, -corpus, when='end')
+    premium =round(premium, -3)
+    currencies = CountryInfo(dict1["country"]).currencies()
+    print(currencies[0])
+    text1 = "According to your responses you would need approximately {} {} as retirement corpus".format(corpus,currencies[0])
+    text2 = "So if you invest {} {} monthly as part of Annuity Plan you would be able to secure your retirement".format(premium,currencies[0])
     return [text1,text2]
 
 
@@ -231,8 +290,38 @@ def noLife(data1):
 
 
 def yesLife(data1):
-    pass
-    #print("Yes life", data1)
+    act = data1.query_result.action
+    if act == "Hi.Hi-yes.Hi-yes-custom":
+        dict1["Sex"] = data1.query_result.query_text
+    elif act == "Hi.Hi-yes.Hi-yes-custom.Age-custom":
+        dict1["Age"] = data1.query_result.parameters["number"]
+    elif act == "Hi.Hi-yes.Hi-yes-custom.Age-custom.Ret-custom":
+        dict1["RetrAge"] = data1.query_result.parameters["number"]
+        planType = goalPlan(dict1["Age"],dict1["RetrAge"])
+        return planType
+    elif act == "Hi.Hi-yes.Hi-yes-custom.Age-custom.Ret-custom.Typ-custom.Nt-custom":
+        dict1["Nicotine"] = data1.query_result.query_text
+    elif act == "Hi.Hi-yes.Hi-yes-custom.Age-custom.Ret-custom.Typ-custom.Nt-custom.Rt-custom":
+        dict1["Income"] = data1.query_result.parameters["number"]
+    elif act == "Hi.Hi-yes.Hi-yes-custom.Age-custom.Ret-custom.Typ-custom.Nt-custom.Rt-custom.Rp-yes":
+        dict1["RetrResp"] = "Yes"
+    elif act == "LocAnn":
+        if dict1["RetrResp"] == "Yes":
+            dict1["RetrAmt"] = data1.query_result.parameters["number"]
+    elif act == "Loc-Ann.Loc-Ann-custom":
+        city = data1.query_result.parameters["geo-city"]
+        dict1["Location"] = city
+        a = geoDetails(city)
+    elif act == "Loc-Ann.Loc-Ann-custom.Inv-no":
+        amt = annCalculation()
+        return amt
+    elif act == "ILoc-Ann.Loc-Ann-custom.Inv-yes.Inv-yes-custom":
+        dict1["Investments"] = data1.query_result.parameters["number"]
+        amt = annCalculation()
+        return amt
+
+
+
 
 
 # @ app.route("/", methods=['POST'])
@@ -288,20 +377,39 @@ def predict():
     # print("=" *20)
 
     # GOD please help me on how to deserialise a Struct protubuf by google. This is a hacky solution until then :(
+    act = resp.query_result.action
+    if act == "Hi.Hi-no":
+        dict1["type"] = "Life Insurance"
+    elif act == "Hi.Hi-yes":
+        dict1["type"] = "Annuity"
+    else:
+        pass
 
+    if dict1["type"] == "Life Insurance":
+        funcot = noLife(resp)
+        if funcot:
+            for i,text in enumerate(funcot):
+                message["answer"+str(i)] = funcot[i]
+                if i==1:
+                    break
 
+            if len(funcot)>2:
+                for i,text in enumerate(funcot[2]):
+                    message["chips"+str(i)] = funcot[2][i]
+            return jsonify(message)
 
-    funcot = noLife(resp)
-    if funcot:
-        for i,text in enumerate(funcot):
-            message["answer"+str(i)] = funcot[i]
-            if i==1:
-                break
+    elif dict1["type"] == "Annuity":
+        funcot = yesLife(resp)
+        if funcot:
+            for i, text in enumerate(funcot):
+                message["answer" + str(i)] = funcot[i]
+                if i == 1:
+                    break
 
-        if len(funcot)>2:
-            for i,text in enumerate(funcot[2]):
-                message["chips"+str(i)] = funcot[2][i]  
-        return jsonify(message)
+            if len(funcot) > 2:
+                for i, text in enumerate(funcot[2]):
+                    message["chips" + str(i)] = funcot[2][i]
+            return jsonify(message)
 
     i = 0
 
