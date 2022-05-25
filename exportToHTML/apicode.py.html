@@ -1,0 +1,91 @@
+<html>
+<head>
+<title>apicode.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #808080;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #cc7832;}
+.s3 { color: #6a8759;}
+.s4 { color: #629755; font-style: italic;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+apicode.py</font>
+</center></td></tr></table>
+<pre><span class="s0">#from google.cloud import dialogflow</span>
+<span class="s2">import </span><span class="s1">json</span>
+<span class="s2">from </span><span class="s1">google.oauth2 </span><span class="s2">import </span><span class="s1">service_account</span>
+<span class="s2">from </span><span class="s1">google.cloud </span><span class="s2">import </span><span class="s1">dialogflow_v2beta1 </span><span class="s2">as </span><span class="s1">dialogflow</span>
+
+<span class="s1">project_id = </span><span class="s3">'nova-dskj'</span>
+
+<span class="s2">with </span><span class="s1">open(</span><span class="s3">'C:/Users/Gautam/Downloads/insur-arcw-f8ac168f2276.json'</span><span class="s1">) </span><span class="s2">as </span><span class="s1">source:</span>
+    <span class="s1">info = json.load(source)</span>
+
+<span class="s1">storage_credentials = service_account.Credentials.from_service_account_info(info)</span>
+<span class="s1">session_client = dialogflow.SessionsClient(credentials=storage_credentials)</span>
+<span class="s2">def </span><span class="s1">detect_intent_texts(project_id</span><span class="s2">, </span><span class="s1">session_id</span><span class="s2">, </span><span class="s1">text</span><span class="s2">, </span><span class="s1">language_code=</span><span class="s3">&quot;en-US&quot;</span><span class="s1">):</span>
+    <span class="s4">&quot;&quot;&quot;Returns the result of detect intent with texts as inputs. 
+ 
+    Using the same `session_id` between requests allows continuation 
+    of the conversation.&quot;&quot;&quot;</span>
+    
+
+    <span class="s1">session = session_client.session_path(project_id</span><span class="s2">, </span><span class="s1">session_id)</span>
+    <span class="s0">#print(&quot;Session path: {}\n&quot;.format(session))</span>
+
+    <span class="s1">knowledge_base_id=</span><span class="s3">'NDk3MjQ5NjI1NjY0MDIyMTE4NA'</span>
+    <span class="s1">text_input = dialogflow.TextInput(text=text</span><span class="s2">, </span><span class="s1">language_code=language_code)</span>
+
+    <span class="s1">knowledge_base_path = dialogflow.KnowledgeBasesClient.knowledge_base_path(</span>
+        <span class="s1">project_id</span><span class="s2">, </span><span class="s1">knowledge_base_id</span>
+    <span class="s1">)</span>
+
+    <span class="s1">query_params = dialogflow.QueryParameters(</span>
+        <span class="s1">knowledge_base_names=[knowledge_base_path]</span>
+    <span class="s1">)</span>
+
+    <span class="s1">query_input = dialogflow.QueryInput(text=text_input)</span>
+
+    <span class="s1">response = session_client.detect_intent(</span>
+        <span class="s1">request={</span><span class="s3">&quot;session&quot;</span><span class="s1">: session</span><span class="s2">, </span><span class="s3">&quot;query_input&quot;</span><span class="s1">: query_input</span><span class="s2">, </span><span class="s3">&quot;query_params&quot;</span><span class="s1">:query_params }</span>
+    <span class="s1">)</span>
+    <span class="s1">intent_name = response.query_result.intent.display_name</span>
+
+    <span class="s0">#richresponses = response.query_result.fulfillment_messages</span>
+    <span class="s2">return </span><span class="s1">response</span>
+    <span class="s0"># return response.query_result.fulfillment_messages,intent_name</span>
+        
+        <span class="s0"># for message in richresponses:</span>
+        <span class="s0">#     if message.text:</span>
+        <span class="s0">#         print(&quot;Not welcome &quot;, message.text.text[0])</span>
+
+
+<span class="s2">def </span><span class="s1">welcome_text(project_id = </span><span class="s3">&quot;nova-dskj&quot;</span><span class="s2">, </span><span class="s1">session_id= </span><span class="s3">&quot;1234&quot;</span><span class="s1">):</span>
+
+    <span class="s1">session = session_client.session_path(project_id</span><span class="s2">, </span><span class="s1">session_id)</span>
+    <span class="s1">event_input = dialogflow.EventInput(name=</span><span class="s3">'WELCOME'</span><span class="s2">, </span><span class="s1">language_code=</span><span class="s3">'en-US'</span><span class="s1">)</span>
+    <span class="s1">query_input = dialogflow.QueryInput(event=event_input)</span>
+    <span class="s1">response = session_client.detect_intent(session=session</span><span class="s2">, </span><span class="s1">query_input=query_input)</span>
+    <span class="s1">richresponses = response.query_result.fulfillment_messages</span>
+    <span class="s0"># return 0</span>
+    
+    
+    <span class="s0"># for message in richresponses:</span>
+    <span class="s0">#     print(&quot;This is &quot;, message.text.text[0])</span>
+    <span class="s2">return </span><span class="s1">response.query_result.fulfillment_messages</span>
+
+    
+    
+<span class="s0"># detect_intent_texts(&quot;insurchatbot&quot;,&quot;1234&quot;,&quot;Hello&quot;,&quot;en-US&quot;)</span>
+<span class="s0"># project_id = &quot;insurchatbot&quot;</span>
+<span class="s0"># welcome_text()</span>
+<span class="s0"># detect_intent_texts(&quot;insurchatbot&quot;,&quot;1234&quot;,&quot;Ram&quot;,&quot;en-US&quot;)</span>
+
+</pre>
+</body>
+</html>
