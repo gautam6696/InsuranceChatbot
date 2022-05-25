@@ -1,6 +1,7 @@
-from google.cloud import dialogflow
+#from google.cloud import dialogflow
 import json
 from google.oauth2 import service_account
+from google.cloud import dialogflow_v2beta1 as dialogflow
 
 project_id = 'nova-dskj'
 
