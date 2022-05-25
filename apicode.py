@@ -19,13 +19,21 @@ def detect_intent_texts(project_id, session_id, text, language_code="en-US"):
     session = session_client.session_path(project_id, session_id)
     #print("Session path: {}\n".format(session))
 
-
+    knowledge_base_id='NDk3MjQ5NjI1NjY0MDIyMTE4NA'
     text_input = dialogflow.TextInput(text=text, language_code=language_code)
+
+    knowledge_base_path = dialogflow.KnowledgeBasesClient.knowledge_base_path(
+        project_id, knowledge_base_id
+    )
+
+    query_params = dialogflow.QueryParameters(
+        knowledge_base_names=[knowledge_base_path]
+    )
 
     query_input = dialogflow.QueryInput(text=text_input)
 
     response = session_client.detect_intent(
-        request={"session": session, "query_input": query_input}
+        request={"session": session, "query_input": query_input, "query_params":query_params }
     )
     intent_name = response.query_result.intent.display_name
 
