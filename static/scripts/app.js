@@ -262,7 +262,7 @@ updateProgressBar(progressBar, value, color) {
                      html += '<div class="messages__item specialmessages__item--operator">' + item.message + '</div>'
 					 }
 
-			        else if (item.message.includes("Awesome! you are one in 13") || (item.message.includes("people having goals are 10 times") ) || (item.message.includes("I see that") ) || (item.message.includes("Early planning enhances") )    || (item.message.includes("Critical illness rider") ) )   {
+			        else if (item.message.includes("Awesome! you are one in 13") || (item.message.includes("people having goals are 10 times") ) || (item.message.includes("I see that") ) || (item.message.includes("Early planning enhances") )    || (item.message.includes("Critical illness rider") ) || (item.message.includes("A rider that allows") )  )   {
                      html += '<div class="messages__item specialmessages3__item--operator">' + item.message + '</div>'
 					 }
 
