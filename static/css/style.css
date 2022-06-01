@@ -210,6 +210,24 @@ body {
     color: white;
 }
 
+.specialmessages3__item--operator {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    background: orange;
+				    font-style: italic;
+					    font-family: Arial;
+    color: white;
+}
+
+.specialmessages2__item--operator {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    background: green;
+    color: white;
+}
+
 
 /* FOOTER */
 .chatbox__footer {
@@ -249,4 +267,31 @@ body {
     border-bottom-left-radius: 50px;
     box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.1);
     cursor: pointer;
+}
+
+.progress {
+  position: relative;
+  width: 80px;
+  height: 30px;
+  background: #9cbab4;
+  border-radius: 10px;
+  overflow: hidden;
+  align: left;
+  right: -80px;
+}
+
+.progress__fill {
+  width: 0%;
+  height: 100%;
+
+  transition: all 0.2s;
+}
+
+.progress__text {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  font: bold 14px "Quicksand", sans-serif;
+  color: #ffffff;
 }

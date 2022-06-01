@@ -20,7 +20,7 @@ dict1 = dict()
 #Dictionary Inititialisations to avoid errors
 dict1["type"] = ""
 dict1["RetrResp"] = ""
-dict1["RetrAmt"]=0
+dict1["RetrAmt"]= -1
 dict1["Investments"]=0
 #Changes Made
 def sumInsured():
@@ -42,8 +42,12 @@ def sumInsured():
     other_income = dict1["Investments"] - dict1["Loan"]
     pv = npf.pv(disc_rate,years,-avg_expenses,0,when='end')
     sum_insured = round(pv[0] - other_income, -3)
-    text1 = "Based on your details the right sum assured for you would be {} ".format(sum_insured)
-    text2 = "Thank you for the details"
+    currencies = CountryInfo(dict1["country"]).currencies()
+    text1 = "Based on your details the right sum assured for you would be {} {} ".format(sum_insured,currencies[0])
+    if dict1["Nicotine"] == "I do not consume":
+        text2 = "Thank you for the details"
+    else:
+        text2 = "You might need Critical Insurance Rider"
     return [text1,text2]
 
 def goalPlan(age,retrAge):
@@ -66,7 +70,6 @@ def annCalculation():
     country_code = list(df_cpi_country)[0]
     df_cpi_inflation = WEO(path).inflation()[country_code]["2021"]
     inflation = df_cpi_inflation*0.01
-
     #Annuity Calculation
     n = dict1["RetrAge"] - dict1["Age"]
     roi = 0.09
@@ -81,7 +84,7 @@ def annCalculation():
     arr_monthly = arr / 12
     retr_months = (life_expectancy - retr_age) * 12
     pmt = fv_expenses
-    if dict1["RetrAmt"]>0:
+    if dict1["RetrAmt"]> 0:
         corpus = npf.pv(arr_monthly, retr_months, -pmt, when='end')
         corpus= corpus[0] - dict1["RetrAmt"]
     else:
@@ -93,11 +96,14 @@ def annCalculation():
         corpus-=dict1["Investments"]
     corpus =round (corpus, -3)
     premium = npf.pmt(roi / 12, n * 12, 0, -corpus, when='end')
-    premium =round(premium, -3)
+    premium =round(premium, -2)
     currencies = CountryInfo(dict1["country"]).currencies()
     print(currencies[0])
     text1 = "According to your responses you would need approximately {} {} as retirement corpus".format(corpus,currencies[0])
-    text2 = "So if you invest {} {} monthly as part of Annuity Plan you would be able to secure your retirement".format(premium,currencies[0])
+    text2 = "So if you invest {} {} monthly as part of Annuity Plan you would be able to secure your retirement. ".format(premium,currencies[0])
+    if int(dict1["Income"]/12)*0.20 < premium:
+        text3 = "\nI would suggest you to check the Guaranteed Lifetime Withdrawal Benefit rider"
+        text2 = text2+text3
     return [text1,text2]
 
 
@@ -105,12 +111,22 @@ def geoDetails(city):
     loc = Nominatim(user_agent="GetLoc")
     # entering the location name
     getLoc = loc.geocode(city)
-    state = getLoc.address.split(",")[-3]
-    country = getLoc.address.split(",")[-1]
-    dict1["country"] = country.strip()
+    if len(getLoc.address.split(",")) == 5:
+        state = getLoc.address.split(",")[-3]
+        country = getLoc.address.split(",")[-1]
+        dict1["country"] = country.strip()
+    if len(getLoc.address.split(",")) == 4:
+        state = getLoc.address.split(",")[-2]
+        country = getLoc.address.split(",")[-1]
+        dict1["country"] = country.strip()
+
+    if dict1["country"] == "United States":
+        country1 = "USA"
+    else:
+        country1 = dict1["country"]
     api_key = "432e12f9-57c3-42c4-8fa1-ba346837d8a8"
     response_api = requests.get(
-        f'http://api.airvisual.com/v2/city?city={city}&state={state}&country={country}&key={api_key}')
+        f'http://api.airvisual.com/v2/city?city={city}&state={state}&country={country1}&key={api_key}')
     data = response_api.text
     parse_json = json.loads(data)
     # print(parse_json)
@@ -119,18 +135,18 @@ def geoDetails(city):
     aqius = parse_json['data']['current']['pollution']['aqius']
     #print(temperature)
     if temperature > 35:
-        climate = "hot climate so be careful"
+        climate = "hot climate so be hydrated & take care when you step out"
     else:
-        climate = "better climate"
+        climate = "good climate conditions"
     if aqius > 100:
         pol = "high pollution levels"
         pol1 = "dangerous so be careful when you step out"
     elif aqius < 100 and aqius > 50:
-        pol = "moderate pollution"
+        pol = "moderate pollution levels"
         pol1 = "okay but take precautions while heading out"
     else:
-        pol = "low pollution"
-        pol1 = "an excellent place to breathe safely"
+        pol = "low pollution levels"
+        pol1 = "an excellent place to be in"
     #Changes Made
     #Expenses details
     file = "C:/Users/Gautam/Desktop/Numbeo.csv"
@@ -139,10 +155,17 @@ def geoDetails(city):
     dict1["AvgExpenses"] = df_values
 
     
-    text1 = " {} has generally {}\n It has {} which is {} ".format(city, climate, pol, pol1)
-    text2 = "What is your marital status ?"
-    chipslist = ["Single","Divorced","Married"]
-    return [text1,text2, chipslist]
+    text1 = "I see that {} has {}.\n The AQI states {} which is {} ".format(city, climate, pol, pol1)
+
+    if dict1["type"] == "Annuity":
+        text2 = 'Did you invest in CDs, Mutual Funds, Equity, etc. ?'
+        chipslist = ["yes","no"]
+    else:
+        text2 = "What is your marital status ?"
+        chipslist = ["Single", "Divorced", "Married"]
+    return [text1, text2, chipslist]
+    #chipslist = ["Single","Divorced","Married"]
+
     # response = {
     #     'fulfillmentMessages': [
     #         {
@@ -265,6 +288,10 @@ def noLife(data1):
         return bmiresponse
     elif act == "Hi.Hi-no.Hi-no-Li-Sex-custom.Hi-no-LI-Sex-Age-custom.Hi-no-LI-Sex-Age-Ht-custom.Hi-no-LI-Sex-Age-Ht-Wt-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-custom":
         dict1["Nicotine"] = data1.query_result.query_text
+        if dict1["Nicotine"] == "I do not consume":
+            text1 = 'Awesome! you are one in 13 out of 100 who doesnt smoke'
+            text2 = 'What is your annual income before tax ?'
+            return [text1,text2]
     elif act == "Hi.Hi-no.Hi-no-Li-Sex-custom.Hi-no-LI-Sex-Age-custom.Hi-no-LI-Sex-Age-Ht-custom.Hi-no-LI-Sex-Age-Ht-Wt-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-Inr-custom":
         dict1["Income"] = data1.query_result.parameters["number"]
     elif act == "Hi.Hi-no.Hi-no-Li-Sex-custom.Hi-no-LI-Sex-Age-custom.Hi-no-LI-Sex-Age-Ht-custom.Hi-no-LI-Sex-Age-Ht-Wt-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-Inr-custom.Hi-no-LI-Sex-Age-Ht-Wt-Nt-Inr-Oc-custom":
@@ -301,21 +328,27 @@ def yesLife(data1):
         return planType
     elif act == "Hi.Hi-yes.Hi-yes-custom.Age-custom.Ret-custom.Typ-custom.Nt-custom":
         dict1["Nicotine"] = data1.query_result.query_text
+        if dict1["Nicotine"] == "I do not consume":
+            text1 = 'Awesome! you are one in 13 out of 100 who doesnt smoke'
+            text2 = 'How much do you earn annually?'
+            return [text1,text2]
     elif act == "Hi.Hi-yes.Hi-yes-custom.Age-custom.Ret-custom.Typ-custom.Nt-custom.Rt-custom":
         dict1["Income"] = data1.query_result.parameters["number"]
     elif act == "Hi.Hi-yes.Hi-yes-custom.Age-custom.Ret-custom.Typ-custom.Nt-custom.Rt-custom.Rp-yes":
         dict1["RetrResp"] = "Yes"
     elif act == "LocAnn":
-        if dict1["RetrResp"] == "Yes":
+        if dict1["RetrResp"] == "yes":
             dict1["RetrAmt"] = data1.query_result.parameters["number"]
+            print(dict1["RetrAmt"])
     elif act == "Loc-Ann.Loc-Ann-custom":
         city = data1.query_result.parameters["geo-city"]
         dict1["Location"] = city
         a = geoDetails(city)
+        return a
     elif act == "Loc-Ann.Loc-Ann-custom.Inv-no":
         amt = annCalculation()
         return amt
-    elif act == "ILoc-Ann.Loc-Ann-custom.Inv-yes.Inv-yes-custom":
+    elif act == "Loc-Ann.Loc-Ann-custom.Inv-yes.Inv-yes-custom":
         dict1["Investments"] = data1.query_result.parameters["number"]
         amt = annCalculation()
         return amt

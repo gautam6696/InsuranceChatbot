@@ -1,6 +1,6 @@
 // const container = document.querySelector('.chatbox_header')
 
-ngrokurl = "https://792d-117-96-205-57.in.ngrok.io"
+ngrokurl = "https://a10c-117-96-205-57.in.ngrok.io"
 // const style ={
 //     top: 0,
 //     left: 0,
@@ -39,10 +39,25 @@ class Chatbox {
         this.chips = [];
         this.star1placed = false;
         this.star2placed = false;
+        this.ind1placed = false;
+        this.ind2placed = false;
+        this.ind3placed = false;
+        this.ind4placed = false;
+        this.ind5placed = false;
+        this.ind6placed = false;
         //var that = this;
         // this.exec = true;
 
     }
+
+updateProgressBar(progressBar, value, color) {
+  value = Math.round(value);
+   progressBar.querySelector(".progress__fill").style.background =`${color}` ;
+  progressBar.querySelector(".progress__fill").style.width = `${value}%`;
+  progressBar.querySelector(".progress__text").textContent = `${value}%`;
+}
+
+
 
     display() {
         const { openButton, chatBox, sendButton } = this.args;
@@ -219,6 +234,8 @@ class Chatbox {
                     // setTimeout( function(){fireworks.stop()}, 4000)
 
                     // This is being called twice. I dont know why so be careful
+
+
                     html += '<div class="messages__item specialmessages__item--operator">' + item.message + '</div>'
                     var chatheader = chatbox.querySelector('.chatbox__star--header')
                     //chatheader.style.transition = "all 2s";
@@ -235,12 +252,50 @@ class Chatbox {
                     
 
                 }
-                else if (item.message.includes("has generally") || item.message.includes("need analysis")) {
 
-                    html += '<div class="messages__item specialmessages__item--operator">' + item.message + '</div>'
+
+
+                 else if (item.message.includes("let you know")&& (!this.ind2placed))   {
+
+                   const myProgressBar = document.querySelector(".progress");
+                    this.updateProgressBar(myProgressBar, 15, '#ff0000');
+                     html += '<div class="messages__item specialmessages__item--operator">' + item.message + '</div>'
+					 }
+
+			        else if (item.message.includes("Awesome! you are one in 13") || (item.message.includes("people having goals are 10 times") ) || (item.message.includes("I see that") ) || (item.message.includes("Early planning enhances") )    || (item.message.includes("Critical illness rider") ) )   {
+                     html += '<div class="messages__item specialmessages3__item--operator">' + item.message + '</div>'
+					 }
+
+
+
+                 else if ((item.message.includes("We know that") || (item.message.includes("it would be preferrable")))  && (!this.ind3placed))  {
+            this.ind2placed = true;
+                   const myProgressBar2 = document.querySelector(".progress");
+                    this.updateProgressBar(myProgressBar2, 35, '#009579');
+                     html += '<div class="messages__item specialmessages3__item--operator">' + item.message + '</div>'
 
                 }
+                                 else if ((item.message.includes("marital status ?") || (item.message.includes("How much do you earn annually")))  && (!this.ind4placed))  {
+            this.ind3placed = true;
+                   const myProgressBar2 = document.querySelector(".progress");
+                    this.updateProgressBar(myProgressBar2, 50, '#009579');
+                     html += '<div class="messages__item messages__item--visitor">' + item.message + '</div>'
 
+                }
+                else if ((item.message.includes("Wise decision") ) && (!this.ind5placed))  {
+            this.ind4placed = true;
+                   const myProgressBar2 = document.querySelector(".progress");
+                    this.updateProgressBar(myProgressBar2, 75, '#009579');
+                     html += '<div class="messages__item specialmessages3__item--operator">' + item.message + '</div>'
+
+                }
+        else if ((item.message.includes("Based on your details") || (item.message.includes("According to your responses"))) && (!this.ind6placed))  {
+            this.ind5placed = true;
+                   const myProgressBar2 = document.querySelector(".progress");
+                    this.updateProgressBar(myProgressBar2, 100, '#009579');
+                     html += '<div class="messages__item specialmessages2__item--operator">' + item.message + '</div>'
+
+                }
                 else {
 
                     html += '<div class="messages__item messages__item--visitor">' + item.message + '</div>'
@@ -430,6 +485,8 @@ class Chatbox {
                 textField.value = ''
             });
     }
+
+
 
 }
 
