@@ -19,7 +19,7 @@ ngrokurl = "https://0762-122-162-68-176.in.ngrok.io"
 // setTimeout( function(){fireworks.stop()},4000)
 // fireworks.setOptions({ intensity: 1})
 
-// after initialization you can change the fireworks parameters
+// after initialization you can change the freworks parameters
 // fireworks.setOptions({ delay: { min: 10, max: 15 }})
 
 class Chatbox {
